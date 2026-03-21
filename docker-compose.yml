@@ -1,0 +1,41 @@
+services:
+  core:
+    build:
+      context: .
+      target: final
+    command: ["/app/entrypoints/start.sh"]
+    container_name: core
+    restart: unless-stopped
+    depends_on:
+      core_pgdb:
+        condition: service_healthy
+    env_file:
+      - ./.env
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000" ]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+
+  core_pgdb:
+    image: postgres:16-alpine
+    container_name: core_pgdb
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    ports:
+      - "5433:5432"
+    volumes:
+      - ~/apps/postgres-core:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U coreuser -d coredb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 7
+      start_period: 25s
