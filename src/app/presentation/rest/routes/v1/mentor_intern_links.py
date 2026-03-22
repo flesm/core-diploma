@@ -41,6 +41,18 @@ async def list_links(
     return [MentorInternLinkResponseViewModel.from_entity(item) for item in entities]
 
 
+@router.get("/my-mentor", response_model=MentorInternLinkResponseViewModel)
+@inject
+async def get_my_mentor(
+    actor: AuthenticatedUser = Depends(get_current_user),
+    service: MentorInternLinkService = Depends(
+        Provide[Container.mentor_intern_link_service]
+    ),
+) -> MentorInternLinkResponseViewModel:
+    entity = await service.get_my_mentor(actor)
+    return MentorInternLinkResponseViewModel.from_entity(entity)
+
+
 @router.get("/{link_id}", response_model=MentorInternLinkResponseViewModel)
 @inject
 async def get_link(
@@ -51,18 +63,6 @@ async def get_link(
     ),
 ) -> MentorInternLinkResponseViewModel:
     entity = await service.get_by_id(actor, link_id)
-    return MentorInternLinkResponseViewModel.from_entity(entity)
-
-
-@router.get("/my-mentor", response_model=MentorInternLinkResponseViewModel)
-@inject
-async def get_my_mentor(
-    actor: AuthenticatedUser = Depends(get_current_user),
-    service: MentorInternLinkService = Depends(
-        Provide[Container.mentor_intern_link_service]
-    ),
-) -> MentorInternLinkResponseViewModel:
-    entity = await service.get_my_mentor(actor)
     return MentorInternLinkResponseViewModel.from_entity(entity)
 
 
